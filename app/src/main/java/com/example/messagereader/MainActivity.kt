@@ -55,10 +55,14 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks, E
         } else {
             this.deviceSerial = sp.getString("DeviceSerial", "")!!
         }
-        if (this.deviceSerial.isEmpty()) {
+        if (this.deviceSerial.isNotEmpty()) {
             val editor = sp.edit()
             editor.putString("DeviceSerial", this.deviceSerial)
-            editor.apply();
+            editor.apply()
+
+            navController.navigate(R.id.action_SaveDeviceIDFragment_to_SmsListFragment)
+        } else {
+            navController.navigate(R.id.action_SmsListFragment_to_SaveDeviceIDFragment)
         }
 
         getSmsFromPhone()
@@ -101,10 +105,8 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks, E
             Manifest.permission.READ_SMS,
             Manifest.permission.RECEIVE_SMS,
             Manifest.permission.READ_PHONE_STATE,
-            "android.permission.READ_PRIVILEGED_PHONE_STATE",
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
-
         )
         if (!EasyPermissions.hasPermissions(this, *perms)) {
             // 没有权限，进行权限请求
@@ -119,14 +121,14 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks, E
     fun getSmsFromPhone() {
         val cr = contentResolver
         val projection = arrayOf(
-            Sms.Inbox._ID,
-            Sms.Inbox.ADDRESS,
-            Sms.Inbox.READ,
-            Sms.Inbox.BODY,
-            Sms.Inbox.DATE,
-            Sms.Inbox.TYPE,
+            Sms._ID,
+            Sms.ADDRESS,
+            Sms.READ,
+            Sms.BODY,
+            Sms.DATE,
+            Sms.TYPE,
         )
-        val cur: Cursor? = cr.query(Sms.Inbox.CONTENT_URI, projection, null, null, Sms.Inbox.DEFAULT_SORT_ORDER)
+        val cur: Cursor? = cr.query(Sms.CONTENT_URI, projection, null, null, Sms.DEFAULT_SORT_ORDER)
         Log.i(TAG, "---------getSmsFromPhone  111")
 
         if (null == cur) {
@@ -134,21 +136,22 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks, E
             return
         }
         while (cur.moveToNext()) {
-            val id = cur.getInt(cur.getColumnIndex(Sms.Inbox._ID))
-            val number = cur.getString(cur.getColumnIndex(Sms.Inbox.ADDRESS)) // 手机号
-            val read = cur.getInt(cur.getColumnIndex(Sms.Inbox.READ)) == 1
-            val body = cur.getString(cur.getColumnIndex(Sms.Inbox.BODY))
-            val timestamp = cur.getLong(cur.getColumnIndex(Sms.Inbox.DATE))
-            val type = cur.getShort(cur.getColumnIndex(Sms.Inbox.TYPE))
+            val id = cur.getInt(cur.getColumnIndex(Sms._ID))
+            val number = cur.getString(cur.getColumnIndex(Sms.ADDRESS)) // 手机号
+            val read = cur.getInt(cur.getColumnIndex(Sms.READ)) == 1
+            val body = cur.getString(cur.getColumnIndex(Sms.BODY))
+            val timestamp = cur.getLong(cur.getColumnIndex(Sms.DATE))
+            val type = cur.getShort(cur.getColumnIndex(Sms.TYPE))
 
             val date = Date(timestamp) // 时间
             val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
             val receiveTime: String = format.format(date)
 
             Log.i(TAG, "---------getSmsFromPhone  ${id}, ${number}, read: $read, ${body}, ${receiveTime}, $type")
+
+            val item = SmsItem(id, number, body, timestamp, 0)
+            SmsRepository.getInstance().insert(item)
         }
         cur.close()
     }
-
-
 }
