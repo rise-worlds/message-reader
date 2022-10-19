@@ -25,7 +25,12 @@ class SmsRepository(private val smsDao: SmsDao) {
     }
 
     @WorkerThread
-    fun insert(word: SmsItem) {
-        SmsDatabase.databaseWriteExecutor.execute { smsDao.insert(word) }
+    fun insert(item: SmsItem) {
+        SmsDatabase.databaseWriteExecutor.execute { smsDao.insert(item) }
+    }
+
+    @WorkerThread
+    fun updateSendStatus(id: Int, status: Int) {
+        SmsDatabase.databaseWriteExecutor.execute { smsDao.setSendStatus(id, status) }
     }
 }

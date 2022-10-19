@@ -26,6 +26,9 @@ class SmsReceiver : BroadcastReceiver() {
                 val receiveTime: String = format.format(date)
                 Log.i(TAG, "number:${msg.originatingAddress}   body:${msg.displayMessageBody}  time:${receiveTime}")
                 Toast.makeText(context, msg.displayMessageBody, Toast.LENGTH_SHORT).show();
+
+                val item = SmsItem(0, msg.originatingAddress!!, msg.displayMessageBody, msg.timestampMillis, 0)
+                SmsRepository.getInstance().insert(item)
             }
         }
     }
