@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.messagereader.databinding.FragmentSmslistBinding
+import org.greenrobot.eventbus.EventBus
 
 
 /**
@@ -28,6 +29,8 @@ class SmsListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSmslistBinding.inflate(inflater, container, false)
+
+        EventBus.getDefault().postSticky(SmsReceiver.NewSmsEvent())
 
         val recyclerView: RecyclerView = binding.recyclerview
         val adapter = SmsListAdapter(SmsListAdapter.SmsDiff())

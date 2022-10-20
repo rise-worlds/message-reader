@@ -44,9 +44,13 @@ android {
 
 dependencies {
     implementation 'pub.devrel:easypermissions:3.0.0'
-    implementation 'com.blankj:utilcodex:1.31.0'
+
+    implementation "com.squareup.okhttp3:okhttp-bom:4.10.0"
+    implementation 'com.squareup.okhttp3:okhttp'
+    implementation 'com.squareup.okhttp3:logging-interceptor'
+
     implementation 'org.greenrobot:eventbus:3.3.1'
-    kapt "org.greenrobot:eventbus-annotation-processor:3.0.1"
+    kapt 'org.greenrobot:eventbus-annotation-processor:3.3.1'
 
     def room_version = "2.4.3"
     implementation "androidx.room:room-runtime:$room_version"

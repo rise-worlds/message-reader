@@ -17,7 +17,6 @@ abstract class SmsDatabase: RoomDatabase() {
         @Volatile private var instance: SmsDatabase? = null
         val databaseWriteExecutor: ExecutorService = Executors.newFixedThreadPool(1)
 
-        // @Synchronized
         fun getInstance(): SmsDatabase {
             return instance ?: synchronized(this) {
                 val _instance = Room.databaseBuilder(

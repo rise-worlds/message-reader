@@ -1,11 +1,8 @@
 package com.example.messagereader
 
 import android.app.Application
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
-import android.os.IBinder
 import org.greenrobot.eventbus.EventBus
 
 
