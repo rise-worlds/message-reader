@@ -19,11 +19,6 @@ abstract class SmsDatabase: RoomDatabase() {
 
         // @Synchronized
         fun getInstance(): SmsDatabase {
-            // if (instance == null) {
-            //     instance = Room.databaseBuilder(App.getContext(), SmsDatabase::class.java, "sms.db")
-            //         .build()
-            // }
-            // return instance as SmsDatabase
             return instance ?: synchronized(this) {
                 val _instance = Room.databaseBuilder(
                         App.getContext(),
@@ -31,6 +26,7 @@ abstract class SmsDatabase: RoomDatabase() {
                         "sms_database"
                     )
                     .addCallback(sRoomDatabaseCallback)
+                    .allowMainThreadQueries()
                     .build()
                 instance = _instance
                 // return _instance

@@ -30,12 +30,12 @@ class SmsListFragment : Fragment() {
         _binding = FragmentSmslistBinding.inflate(inflater, container, false)
 
         val recyclerView: RecyclerView = binding.recyclerview
-        val adapter = SmsListAdapter(SmsListAdapter.WordDiff())
+        val adapter = SmsListAdapter(SmsListAdapter.SmsDiff())
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this.context)
 
         mSmsViewModel = ViewModelProvider(this)[SmsViewModel::class.java]
-        mSmsViewModel!!.allWords.observe(viewLifecycleOwner) { items ->
+        mSmsViewModel!!.allSmsItems.observe(viewLifecycleOwner) { items ->
             // Update the cached copy of the words in the adapter.
             adapter.submitList(items)
         }
@@ -45,10 +45,6 @@ class SmsListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // binding.buttonSecond.setOnClickListener {
-        //     findNavController().navigate(R.id.action_SaveDeviceIDFragment_to_SmsListFragment)
-        // }
     }
 
     override fun onDestroyView() {

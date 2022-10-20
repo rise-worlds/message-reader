@@ -13,8 +13,11 @@ interface SmsDao {
     @Query("SELECT * FROM sms ORDER BY id DESC")
     fun getAll(): LiveData<List<SmsItem>>
 
+    @Query("SELECT * FROM sms WHERE id=:id")
+    fun get(id: Int): SmsItem?
+
     @Query("SELECT * FROM sms WHERE send_status=:status")
-    fun loadFromSendStatus(status: Int): LiveData<List<SmsItem>>
+    fun getFromSendStatus(status: Int): List<SmsItem>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertAll(vararg smsList: SmsItem)

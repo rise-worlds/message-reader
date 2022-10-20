@@ -44,6 +44,7 @@
                 <data android:mimeType="application/vnd.wap.mms-message" />
             </intent-filter>
         </receiver>
+        <service android:name=".SmsRelayService"/>
     </application>
 
     <uses-feature

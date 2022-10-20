@@ -1,5 +1,6 @@
 package com.example.messagereader
 
+import android.util.Log
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 
@@ -24,9 +25,20 @@ class SmsRepository(private val smsDao: SmsDao) {
         return smsDao.getAll()
     }
 
+    fun getFromSendStatus(status: Int): List<SmsItem> {
+        return smsDao.getFromSendStatus(status)
+    }
+
+    @WorkerThread
+    fun get(id: Int): SmsItem? {
+        return smsDao.get(id)
+    }
+
     @WorkerThread
     fun insert(item: SmsItem) {
-        SmsDatabase.databaseWriteExecutor.execute { smsDao.insert(item) }
+        SmsDatabase.databaseWriteExecutor.execute {
+            smsDao.insert(item)
+        }
     }
 
     @WorkerThread

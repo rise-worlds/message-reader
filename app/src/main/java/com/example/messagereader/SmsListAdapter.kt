@@ -16,7 +16,7 @@ class SmsListAdapter(@NonNull diffCallback: DiffUtil.ItemCallback<SmsItem>) :
         holder.bind(current)
     }
 
-    internal class WordDiff : DiffUtil.ItemCallback<SmsItem>() {
+    internal class SmsDiff : DiffUtil.ItemCallback<SmsItem>() {
         override fun areItemsTheSame(@NonNull oldItem: SmsItem, @NonNull newItem: SmsItem): Boolean {
             return oldItem === newItem
         }

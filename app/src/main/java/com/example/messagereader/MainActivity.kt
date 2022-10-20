@@ -27,7 +27,6 @@ import java.lang.reflect.Method
 import java.text.SimpleDateFormat
 import java.util.Date
 
-
 class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks, EasyPermissions.RationaleCallbacks {
     private val TAG = "MainActivity"
     private val RC_READ_SMS_PERM = 124
@@ -64,8 +63,6 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks, E
         } else {
             navController.navigate(R.id.action_SmsListFragment_to_SaveDeviceIDFragment)
         }
-
-        getSmsFromPhone()
     }
 
     override fun onRequestPermissionsResult(
@@ -81,7 +78,6 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks, E
     override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
         // 授予权限
         Log.d(TAG, "onPermissionsGranted:" + requestCode + ":" + perms.size)
-        getSmsFromPhone()
     }
 
     override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
@@ -117,41 +113,4 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks, E
         }
     }
 
-    @SuppressLint("Range", "Recycle", "SimpleDateFormat")
-    fun getSmsFromPhone() {
-        val cr = contentResolver
-        val projection = arrayOf(
-            Sms._ID,
-            Sms.ADDRESS,
-            Sms.READ,
-            Sms.BODY,
-            Sms.DATE,
-            Sms.TYPE,
-        )
-        val cur: Cursor? = cr.query(Sms.CONTENT_URI, projection, null, null, Sms.DEFAULT_SORT_ORDER)
-        Log.i(TAG, "---------getSmsFromPhone  111")
-
-        if (null == cur) {
-            Log.e(TAG, "读取短信出错")
-            return
-        }
-        while (cur.moveToNext()) {
-            val id = cur.getInt(cur.getColumnIndex(Sms._ID))
-            val number = cur.getString(cur.getColumnIndex(Sms.ADDRESS)) // 手机号
-            val read = cur.getInt(cur.getColumnIndex(Sms.READ)) == 1
-            val body = cur.getString(cur.getColumnIndex(Sms.BODY))
-            val timestamp = cur.getLong(cur.getColumnIndex(Sms.DATE))
-            val type = cur.getShort(cur.getColumnIndex(Sms.TYPE))
-
-            val date = Date(timestamp) // 时间
-            val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-            val receiveTime: String = format.format(date)
-
-            Log.i(TAG, "---------getSmsFromPhone  ${id}, ${number}, read: $read, ${body}, ${receiveTime}, $type")
-
-            val item = SmsItem(id, number, body, timestamp, 0)
-            SmsRepository.getInstance().insert(item)
-        }
-        cur.close()
-    }
 }
