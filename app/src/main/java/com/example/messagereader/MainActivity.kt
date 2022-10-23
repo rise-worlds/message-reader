@@ -3,8 +3,12 @@ package com.example.messagereader
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -20,6 +24,7 @@ import java.io.File
 class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     private val TAG = "MainActivity"
     private val RC_READ_SMS_PERM = 124
+    private val RC_ALL_SD_FILES_ACCESS = 125
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
@@ -36,6 +41,15 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         setupActionBarWithNavController(navController, appBarConfiguration)
 
         requestPermissions()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // 先判断有没有权限
+            if (!Environment.isExternalStorageManager()) {
+                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                intent.setData(Uri.parse("package:" + App.getContext().packageName))
+                startActivityForResult(intent, RC_ALL_SD_FILES_ACCESS)
+            }
+        }
 
         val sp = this.applicationContext.getSharedPreferences("config", MODE_PRIVATE)
         val editor = sp.edit()
@@ -98,10 +112,8 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
             Manifest.permission.READ_SMS,
             Manifest.permission.RECEIVE_SMS,
             Manifest.permission.READ_PHONE_STATE,
-            "android.permission.READ_PRIVILEGED_PHONE_STATE",
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
-
         )
         if (!EasyPermissions.hasPermissions(this, *perms)) {
             // 没有权限，进行权限请求
