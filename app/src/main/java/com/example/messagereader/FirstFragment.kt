@@ -39,6 +39,8 @@ class FirstFragment : Fragment() {
         if (sp != null) {
             val deviceSerial = sp.getString("DeviceSerial", "")
             binding.editDeviceId.setText(deviceSerial)
+            val phoneNumber = sp.getString("DevicePhoneNumber", "")
+            binding.textviewPhone.text = phoneNumber
         }
 
         binding.buttonFirst.setOnClickListener {
