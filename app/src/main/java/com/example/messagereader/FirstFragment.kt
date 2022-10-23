@@ -7,14 +7,14 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.example.messagereader.databinding.FragmentSaveDeviceidBinding
+import com.example.messagereader.databinding.FragmentFirstBinding
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
  */
-class SaveDeviceIdFragment : Fragment() {
+class FirstFragment : Fragment() {
 
-    private var _binding: FragmentSaveDeviceidBinding? = null
+    private var _binding: FragmentFirstBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -23,9 +23,9 @@ class SaveDeviceIdFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
+    ): View? {
 
-        _binding = FragmentSaveDeviceidBinding.inflate(inflater, container, false)
+        _binding = FragmentFirstBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -51,7 +51,7 @@ class SaveDeviceIdFragment : Fragment() {
                 editor.putString("DeviceSerial", deviceSerial)
                 editor.apply()
             }
-            findNavController().navigate(R.id.action_SaveDeviceIDFragment_to_SmsListFragment)
+            findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
         }
     }
 
