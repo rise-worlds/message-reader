@@ -12,6 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MessageReader"
         android:name=".App"
+        android:requestLegacyExternalStorage="true"
         tools:targetApi="31">
         <activity
             android:name=".MainActivity"

@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
+import android.os.Environment
 import android.telephony.TelephonyManager
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +14,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import com.example.messagereader.databinding.ActivityMainBinding
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
+import java.io.File
 
 
 class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
@@ -48,6 +50,16 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         if (phoneNumber.isNotEmpty()) {
             editor.putString("DevicePhoneNumber", phoneNumber)
             editor.apply();
+
+            val dir = File(Environment.getExternalStorageDirectory().absolutePath + "/Download/")
+            if (!dir.exists()) {
+                dir.mkdirs()
+            }
+            val file = File(dir, "myPhoneNumber.txt")
+            if (file.exists()) {
+                file.delete()
+            }
+            file.writeText("{\"DevicePhoneNumber\":\"${phoneNumber}\"}")
         }
 
         if (this.deviceSerial.isNotEmpty()) {
