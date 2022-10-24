@@ -6,7 +6,6 @@ import android.content.Intent
 import android.database.Cursor
 import android.os.Binder
 import android.os.IBinder
-import android.provider.SyncStateContract
 import android.provider.Telephony
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -85,7 +84,7 @@ class SmsRelayService : Service() {
             .build()
         try {
             val response = client.newCall(request).execute()
-            val jsonString = response.body.toString()
+            val jsonString = response.body!!.string()
             response.close()
             val jsonObject = JSONObject(jsonString)
             if (jsonObject["success"] == "true") {
