@@ -1,5 +1,6 @@
 package com.example.messagereader
 
+import android.annotation.SuppressLint
 import android.view.ViewGroup
 import androidx.annotation.NonNull
 import androidx.recyclerview.widget.DiffUtil
@@ -14,6 +15,11 @@ class SmsListAdapter(@NonNull diffCallback: DiffUtil.ItemCallback<SmsItem>) :
     override fun onBindViewHolder(holder: SmsViewHolder, position: Int) {
         val current: SmsItem = getItem(position)
         holder.bind(current)
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun update() {
+        notifyDataSetChanged()
     }
 
     internal class SmsDiff : DiffUtil.ItemCallback<SmsItem>() {

@@ -11,12 +11,16 @@ class SmsViewModel(application: Application?) : AndroidViewModel(application!!) 
     // - We can put an observer on the data (instead of polling for changes) and only update the
     //   the UI when the data actually changes.
     // - Repository is completely separated from the UI through the ViewModel.
-    private val mAllSmsItems: LiveData<List<SmsItem>> = SmsRepository.getInstance().getAll()
+    private var mAllSmsItems: LiveData<List<SmsItem>> = SmsRepository.getInstance().getAll()
 
     val allSmsItems: LiveData<List<SmsItem>>
         get() = mAllSmsItems
 
     fun insert(item: SmsItem) {
         SmsRepository.getInstance().insert(item)
+    }
+
+    fun update() {
+        mAllSmsItems = SmsRepository.getInstance().getAll()
     }
 }

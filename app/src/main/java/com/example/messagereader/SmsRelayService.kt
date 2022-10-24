@@ -41,11 +41,12 @@ class SmsRelayService : Service() {
     @OptIn(InternalCoroutinesApi::class)
     override fun onCreate() {
         super.onCreate()
-
         EventBus.getDefault().register(this)
+
+        var updateUI = false
         thread = Thread {
             while (true) {
-                Thread.sleep(3000)
+                Thread.sleep(1000)
 
                 val sp = App.getContext().getSharedPreferences("config", AppCompatActivity.MODE_PRIVATE)
                 // val deviceSerial = sp.getString("DeviceSerial", "")
@@ -62,6 +63,11 @@ class SmsRelayService : Service() {
                             SmsRepository.getInstance().updateSendStatus(it.id, result)
                         }
                     }
+                }
+                if (updateUI) {
+                    updateUI = false
+
+                    EventBus.getDefault().post(SmsReceiver.UpdateSmsListEvent())
                 }
             }
         }
@@ -114,11 +120,6 @@ class SmsRelayService : Service() {
     @Subscribe(sticky = true)
     fun handleEvent(event: SmsReceiver.NewSmsEvent) {
         getSmsFromPhone()
-
-        // val className = this.javaClass.simpleName
-        // val message = "#handleEvent: called for " + event.javaClass.simpleName
-        // Toast.makeText(this, className + message, Toast.LENGTH_SHORT).show()
-        // Log.d(className, message)
 
         // prevent event from re-delivering, like when leaving and coming back to app
         EventBus.getDefault().removeStickyEvent(event)

@@ -5,7 +5,7 @@
         android:gravity="bottom">
         <shape>
             <solid
-                android:color="#EEEEEE"/>
+                android:color="#7B68EE"/>
         </shape>
     </item>
 </layer-list>
