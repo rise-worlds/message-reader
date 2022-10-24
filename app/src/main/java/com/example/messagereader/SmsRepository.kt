@@ -1,6 +1,5 @@
 package com.example.messagereader
 
-import android.util.Log
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 

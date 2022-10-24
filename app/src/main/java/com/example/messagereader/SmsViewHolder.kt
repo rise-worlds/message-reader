@@ -32,7 +32,7 @@ class SmsViewHolder private constructor(itemView: View) :
         val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         val receiveTime: String = format.format(date)
         this.timeView.text = receiveTime
-        reportView.text = if (item.sendStatus == 0) "under-report" else "reported"
+        reportView.text = if (item.sendStatus == 0) "under-report" else if (item.sendStatus == 1) "reported" else "not auth code"
         this.bodyView.text = item.body
     }
 

@@ -56,8 +56,10 @@ class SmsRelayService : Service() {
                 synchronized(dbLock) {
                     val list = SmsRepository.getInstance().getFromSendStatus(0)
                     list.forEach {
-                        if (report(phoneNumber, it) != 0) {
-                            SmsRepository.getInstance().updateSendStatus(it.id, 1)
+                        val result = report(phoneNumber, it)
+                        if (result != 0) {
+                            updateUI = true
+                            SmsRepository.getInstance().updateSendStatus(it.id, result)
                         }
                     }
                 }
@@ -72,7 +74,7 @@ class SmsRelayService : Service() {
         val pattern: Pattern = Pattern.compile("(\\d{6})")
         val matcher: Matcher = pattern.matcher(sms.body)
         if (!matcher.find()) {
-            return status;
+            return 2;
         }
         val code = matcher.group(0);
         Log.d("main", "验证码为: $code");
