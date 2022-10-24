@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
             // 先判断有没有权限
             if (!Environment.isExternalStorageManager()) {
                 val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
-                intent.setData(Uri.parse("package:" + App.getContext().packageName))
+                intent.data = Uri.parse("package:" + App.getContext().packageName)
                 startActivityForResult(intent, RC_ALL_SD_FILES_ACCESS)
             }
         }
