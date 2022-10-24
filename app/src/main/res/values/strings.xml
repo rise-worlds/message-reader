@@ -2,12 +2,11 @@
     <string name="app_name">MessageReader</string>
     <string name="action_settings">Settings</string>
     <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
+    <string name="first_fragment_label">Device Info</string>
+    <string name="second_fragment_label">Sms List</string>
     <string name="next">Save</string>
     <string name="previous">Previous</string>
 
     <string name="hello_your_phone_number">your phone number is:</string>
     <string name="hello_first_fragment">please input the device id</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
 </resources>
