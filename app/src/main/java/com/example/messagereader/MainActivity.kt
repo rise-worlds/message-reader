@@ -60,7 +60,10 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
             this.deviceSerial = sp.getString("DeviceSerial", "")!!
         }
 
-        val phoneNumber = getNativePhoneNumber()
+        var phoneNumber = intent.getStringExtra("DevicePhoneNumber")!!
+        if (phoneNumber.isEmpty()) {
+            phoneNumber = getNativePhoneNumber()
+        }
         if (phoneNumber.isNotEmpty()) {
             editor.putString("DevicePhoneNumber", phoneNumber)
             editor.apply();
