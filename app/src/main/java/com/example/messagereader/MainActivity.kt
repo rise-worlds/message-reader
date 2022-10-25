@@ -135,7 +135,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         if (EasyPermissions.hasPermissions(this, *perms)) {
             val telephonyManager = this.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
             val nativePhoneNumber = telephonyManager.line1Number
-            Log.d(TAG, "getNativePhoneNumber++++++++++++: $nativePhoneNumber")
+            Log.d(TAG, "getNativePhoneNumber: $nativePhoneNumber")
             return nativePhoneNumber
         }
 
