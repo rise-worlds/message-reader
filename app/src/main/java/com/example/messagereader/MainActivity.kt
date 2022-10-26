@@ -60,8 +60,8 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
             this.deviceSerial = sp.getString("DeviceSerial", "")!!
         }
 
-        var phoneNumber = intent.getStringExtra("DevicePhoneNumber")!!
-        if (phoneNumber.isEmpty()) {
+        var phoneNumber = intent.getStringExtra("DevicePhoneNumber")
+        if (phoneNumber == null) {
             phoneNumber = getNativePhoneNumber()
         }
         if (phoneNumber.isNotEmpty()) {
@@ -73,10 +73,12 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
                 dir.mkdirs()
             }
             val file = File(dir, "myPhoneNumber.txt")
-            if (file.exists()) {
-                file.delete()
+            with(file) {
+                if (exists()) {
+                    delete()
+                }
+                writeText("{\"DevicePhoneNumber\":\"${phoneNumber}\"}")
             }
-            file.writeText("{\"DevicePhoneNumber\":\"${phoneNumber}\"}")
         }
 
         if (this.deviceSerial.isNotEmpty()) {
