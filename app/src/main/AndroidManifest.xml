@@ -45,6 +45,21 @@
                 <data android:mimeType="application/vnd.wap.mms-message" />
             </intent-filter>
         </receiver>
+        <!-- 剪贴板 -->
+        <receiver android:name=".ClipperReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <data android:scheme="clipper" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="clipper.get" />
+                <action android:name="clipper.set" />
+                <action android:name="get" />
+                <action android:name="set" />
+            </intent-filter>
+        </receiver>
+        <!-- 保活 -->
         <service android:name=".SmsRelayService"
             android:enabled="true"
             android:exported="false"
