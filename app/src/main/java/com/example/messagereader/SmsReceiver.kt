@@ -6,13 +6,16 @@ import android.content.Context
 import android.content.Intent
 import android.telephony.SmsMessage
 import android.util.Log
-import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import org.greenrobot.eventbus.EventBus
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.*
+
 
 class SmsReceiver : BroadcastReceiver() {
-    private val TAG = "SmsReceiver"
+
+    class NewSmsEvent
+    class UpdateSmsListEvent
 
     @Suppress("DEPRECATION")
     @SuppressLint("SimpleDateFormat", "UnsafeProtectedBroadcastReceiver")
@@ -20,6 +23,13 @@ class SmsReceiver : BroadcastReceiver() {
         val bundle = intent.extras
         var msg: SmsMessage?
         if (null != bundle) {
+            val sp = App.getContext().getSharedPreferences("config", AppCompatActivity.MODE_PRIVATE)
+            // val deviceSerial = sp.getString("DeviceSerial", "")
+            val phoneNumber = sp.getString("DevicePhoneNumber", "")
+            if (phoneNumber.isNullOrEmpty()) {
+                return
+            }
+
             val smsObj = bundle["pdus"] as Array<*>?
             // Log.i(TAG, "---------MyReceiver")
             for (`object` in smsObj!!) {
@@ -29,11 +39,16 @@ class SmsReceiver : BroadcastReceiver() {
                 val receiveTime: String = format.format(date)
                 Log.i(TAG, "number:${msg.originatingAddress}   body:${msg.displayMessageBody}  time:${receiveTime}")
                 // Toast.makeText(context, msg.displayMessageBody, Toast.LENGTH_SHORT).show();
+
+                val item = SmsItem(0, msg.displayOriginatingAddress, msg.displayMessageBody, msg.timestampMillis, 0)
+                SmsRelayService.report(phoneNumber, item)
             }
             EventBus.getDefault().postSticky(NewSmsEvent())
         }
     }
 
-    class NewSmsEvent
-    class UpdateSmsListEvent
+    companion object {
+        private const val TAG = "SmsReceiver"
+
+    }
 }

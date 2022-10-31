@@ -35,7 +35,6 @@ import java.util.regex.Pattern
 
 
 class SmsRelayService : Service() {
-    private val TAG = "SmsRelayService"
 
     private val dbLock = Object()
     private var mBinder = SmsBinder()
@@ -54,7 +53,6 @@ class SmsRelayService : Service() {
         val notification = createNotification()
         startForeground(1, notification)
 
-        var updateUI = false
         thread = Thread {
             while (true) {
                 Thread.sleep(1000)
@@ -85,40 +83,6 @@ class SmsRelayService : Service() {
         thread!!.start()
     }
 
-    private fun report(phoneNumber: String, sms: SmsItem): Int {
-        var status = 0
-        val client = OkHttpClient()
-        val pattern: Pattern = Pattern.compile("(\\d{6})")
-        val matcher: Matcher = pattern.matcher(sms.body)
-        if (!matcher.find()) {
-            return 2;
-        }
-        val code = matcher.group(0);
-        Log.d("main", "验证码为: $code");
-        // val body = "{\"mobile\":\"${phoneNumber}\", \"code\":{\"phone\":\"$sms.number\", \"body\":\"$sms.body\", \"receiveTime\":\"$sms.receiveTime\"}}".toRequestBody(JSON)
-        val body = "{\"mobile\":\"${phoneNumber}\", \"code\":\"$code\"}".toRequestBody(JSON)
-        val request = Request.Builder()
-            .url("https://finance.lionvip.xyz/api/sys/set_mobile_code")
-            .post(body)
-            .build()
-        try {
-            val response = client.newCall(request).execute()
-            val jsonString = response.body!!.string()
-            response.close()
-            val jsonObject = JSONObject(jsonString)
-            if (jsonObject["success"] == "true") {
-                status = 1
-            }
-        } catch (_: IOException) {
-
-        } catch (_: JSONException) {
-
-        } finally {
-
-        }
-        return status
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         EventBus.getDefault().unregister(this)
@@ -145,7 +109,47 @@ class SmsRelayService : Service() {
     }
 
     companion object {
+        private val TAG = "SmsRelayService"
         val JSON: MediaType = "application/json; charset=utf-8".toMediaType()
+        var updateUI = false
+
+        fun report(phoneNumber: String, sms: SmsItem): Int {
+            val pattern: Pattern = Pattern.compile("^Your verification code is (\\d{6})")
+            val matcher: Matcher = pattern.matcher(sms.body)
+            if (!matcher.find()) {
+                return 2;
+            }
+            val code = matcher.group(1) ?: return 2;
+            Log.d(TAG, "验证码为: $code");
+            // val body = "{\"mobile\":\"${phoneNumber}\", \"code\":{\"phone\":\"$sms.number\", \"body\":\"$sms.body\", \"receiveTime\":\"$sms.receiveTime\"}}".toRequestBody(JSON)
+            val requestBody = "{\"mobile\":\"${phoneNumber}\", \"code\":\"$code\"}".toRequestBody(SmsRelayService.JSON)
+
+            Thread {
+                val client = OkHttpClient()
+                val request = Request.Builder()
+                    .url("https://finance.lionvip.xyz/api/sys/set_mobile_code")
+                    .post(requestBody)
+                    .build()
+                try {
+                    val response = client.newCall(request).execute()
+                    val jsonString = response.body!!.string()
+                    response.close()
+                    val jsonObject = JSONObject(jsonString)
+                    if (jsonObject["success"] == "true") {
+                        if (sms.id != 0) {
+                            SmsRepository.getInstance().updateSendStatus(sms.id, 2)
+                        }
+                    }
+                } catch (_: IOException) {
+
+                } catch (_: JSONException) {
+
+                } finally {
+
+                }
+            }.start()
+            return 0
+        }
     }
 
     @OptIn(InternalCoroutinesApi::class)
@@ -169,8 +173,9 @@ class SmsRelayService : Service() {
             return
         }
         val sp = App.getContext().getSharedPreferences("config", AppCompatActivity.MODE_PRIVATE)
-        val deviceSerial = sp.getString("DeviceSerial", "")
-        if (deviceSerial.isNullOrEmpty()) {
+        // val deviceSerial = sp.getString("DeviceSerial", "")
+        val phoneNumber = sp.getString("DevicePhoneNumber", "")
+        if (phoneNumber.isNullOrEmpty()) {
             return
         }
         synchronized(dbLock) {
@@ -195,6 +200,8 @@ class SmsRelayService : Service() {
                 if (item == null) {
                     item = SmsItem(id, number, body, timestamp, 0)
                     SmsRepository.getInstance().insert(item)
+
+                    report(phoneNumber, item)
                 }
             }
         }
