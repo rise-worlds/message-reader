@@ -1,11 +1,7 @@
 package com.example.messagereader
 
 import android.annotation.SuppressLint
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
+import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
@@ -29,7 +25,7 @@ import org.greenrobot.eventbus.Subscribe
 import org.json.JSONException
 import org.json.JSONObject
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -50,8 +46,6 @@ class SmsRelayService : Service() {
         EventBus.getDefault().register(this)
 
         Log.i(TAG, "The service has been created")
-        val notification = createNotification()
-        startForeground(1, notification)
 
         thread = Thread {
             while (true) {
@@ -66,17 +60,15 @@ class SmsRelayService : Service() {
                 synchronized(dbLock) {
                     val list = SmsRepository.getInstance().getFromSendStatus(0)
                     list.forEach {
-                        val result = report(phoneNumber, it)
-                        if (result != 0) {
-                            updateUI = true
-                            SmsRepository.getInstance().updateSendStatus(it.id, result)
-                        }
+                        report(phoneNumber, it)
                     }
-                }
-                if (updateUI) {
-                    updateUI = false
+                    // val item = SmsItem(0, "0", "Your verification code is 987527. Use this to verify your transfer with HNB Digital Banking", 0, 0)
+                    // report("123456", item)
+                    if (updateUI) {
+                        updateUI = false
 
-                    EventBus.getDefault().post(SmsReceiver.UpdateSmsListEvent())
+                        EventBus.getDefault().post(SmsReceiver.UpdateSmsListEvent())
+                    }
                 }
             }
         }
@@ -86,10 +78,13 @@ class SmsRelayService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         EventBus.getDefault().unregister(this)
+        stopForeground(true)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         // return super.onStartCommand(intent, flags, startId)
+        val notification = createNotification()
+        startForeground(110, notification)
         return START_STICKY;
     }
 
@@ -109,8 +104,8 @@ class SmsRelayService : Service() {
     }
 
     companion object {
-        private val TAG = "SmsRelayService"
-        val JSON: MediaType = "application/json; charset=utf-8".toMediaType()
+        private const val TAG = "SmsRelayService"
+        private val JSON: MediaType = "application/json; charset=utf-8".toMediaType()
         var updateUI = false
 
         fun report(phoneNumber: String, sms: SmsItem): Int {
@@ -138,6 +133,8 @@ class SmsRelayService : Service() {
                     if (jsonObject["success"] == "true") {
                         if (sms.id != 0) {
                             SmsRepository.getInstance().updateSendStatus(sms.id, 2)
+
+                            updateUI = true
                         }
                     }
                 } catch (_: IOException) {
