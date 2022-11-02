@@ -6,9 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.database.Cursor
 import android.graphics.Color
-import android.os.Binder
-import android.os.Build
-import android.os.IBinder
+import android.os.*
 import android.provider.Telephony
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -35,6 +33,7 @@ class SmsRelayService : Service() {
     private val dbLock = Object()
     private var mBinder = SmsBinder()
     private var thread: Thread? = null
+    private val handler: Handler = Handler()
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -46,6 +45,7 @@ class SmsRelayService : Service() {
         EventBus.getDefault().register(this)
 
         Log.i(TAG, "The service has been created")
+        EventBus.getDefault().post(SmsReceiver.NewSmsEvent())
 
         thread = Thread {
             while (true) {
@@ -90,7 +90,7 @@ class SmsRelayService : Service() {
 
     @Subscribe(sticky = true)
     fun handleEvent(event: SmsReceiver.NewSmsEvent) {
-        getSmsFromPhone()
+        handler.postDelayed({ getSmsFromPhone() }, 1000)
 
         // prevent event from re-delivering, like when leaving and coming back to app
         EventBus.getDefault().removeStickyEvent(event)

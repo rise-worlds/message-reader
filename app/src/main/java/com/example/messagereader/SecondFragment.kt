@@ -13,6 +13,7 @@ import com.example.messagereader.databinding.FragmentSecondBinding
 import okhttp3.internal.notify
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 
 /**
  * A simple [Fragment] subclass as the second destination in the navigation.
@@ -44,7 +45,6 @@ class SecondFragment : Fragment() {
             adapter.submitList(items)
         }
 
-        EventBus.getDefault().postSticky(SmsReceiver.NewSmsEvent())
         EventBus.getDefault().register(this)
 
         return binding.root
@@ -56,11 +56,12 @@ class SecondFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        EventBus.getDefault().unregister(this)
         _binding = null
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    @Subscribe(sticky = true)
+    @Subscribe(threadMode = ThreadMode.MAIN)
     fun handleEvent(event: SmsReceiver.UpdateSmsListEvent) {
         mSmsViewModel.update()
         adapter.update()

@@ -43,7 +43,7 @@ class SmsReceiver : BroadcastReceiver() {
                 val item = SmsItem(0, msg.displayOriginatingAddress, msg.displayMessageBody, msg.timestampMillis, 0)
                 SmsRelayService.report(phoneNumber, item)
             }
-            EventBus.getDefault().postSticky(NewSmsEvent())
+            EventBus.getDefault().post(NewSmsEvent())
         }
     }
 
