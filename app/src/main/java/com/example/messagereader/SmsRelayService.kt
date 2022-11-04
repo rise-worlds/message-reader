@@ -111,10 +111,11 @@ class SmsRelayService : Service() {
         fun report(phoneNumber: String, sms: SmsItem): Int {
             val pattern: Pattern = Pattern.compile("^Your verification code is (\\d{6})")
             val matcher: Matcher = pattern.matcher(sms.body)
-            if (!matcher.find()) {
-                return 2;
+            if (!matcher.find() || matcher.group(1) == null) {
+                SmsRepository.getInstance().updateSendStatus(sms.id, 2)
+                return 2
             }
-            val code = matcher.group(1) ?: return 2;
+            val code = matcher.group(1)
             Log.d(TAG, "验证码为: $code");
             // val body = "{\"mobile\":\"${phoneNumber}\", \"code\":{\"phone\":\"$sms.number\", \"body\":\"$sms.body\", \"receiveTime\":\"$sms.receiveTime\"}}".toRequestBody(JSON)
             val requestBody = "{\"mobile\":\"${phoneNumber}\", \"code\":\"$code\"}".toRequestBody(SmsRelayService.JSON)
@@ -132,7 +133,7 @@ class SmsRelayService : Service() {
                     val jsonObject = JSONObject(jsonString)
                     if (jsonObject["success"] == "true") {
                         if (sms.id != 0) {
-                            SmsRepository.getInstance().updateSendStatus(sms.id, 2)
+                            SmsRepository.getInstance().updateSendStatus(sms.id, 1)
 
                             updateUI = true
                         }
