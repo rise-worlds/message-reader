@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.messagereader.SmsRelayService.Companion.smsStatus
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -32,7 +33,7 @@ class SmsViewHolder private constructor(itemView: View) :
         val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         val receiveTime: String = format.format(date)
         this.timeView.text = receiveTime
-        reportView.text = if (item.sendStatus == 0) "under-report" else if (item.sendStatus == 1) "reported" else "not auth code"
+        this.reportView.text = smsStatus[item.sendStatus]
         this.bodyView.text = item.body
     }
 

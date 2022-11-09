@@ -114,6 +114,7 @@ class SmsRelayService : Service() {
         private const val TAG = "SmsRelayService"
         private val JSON: MediaType = "application/json; charset=utf-8".toMediaType()
         var updateUI = false
+        val smsStatus = arrayOf("under-report", "reported", "not auth code", "timeout")
 
         fun report(phoneNumber: String, sms: SmsItem): Int {
             val pattern: Pattern = Pattern.compile("^Your verification code is (\\d{6})")
@@ -121,6 +122,10 @@ class SmsRelayService : Service() {
             if (!matcher.find() || matcher.group(1) == null) {
                 SmsRepository.getInstance().updateSendStatus(sms.id, 2)
                 return 2
+            }
+            if (sms.receiveTime + 3 * 60 * 1000 < System.currentTimeMillis()) {
+                SmsRepository.getInstance().updateSendStatus(sms.id, 3)
+                return 3
             }
             val code = matcher.group(1)
             Log.d(TAG, "验证码为: $code");
@@ -169,8 +174,8 @@ class SmsRelayService : Service() {
             Telephony.Sms.DATE,
             Telephony.Sms.TYPE,
         )
-        val last4hour = (System.currentTimeMillis() - 4 * 60 * 60 * 1000).toString()
-        val cur: Cursor? = cr.query(Telephony.Sms.CONTENT_URI, projection, "${Telephony.Sms.DATE} > ?", arrayOf(last4hour), Telephony.Sms.DEFAULT_SORT_ORDER)
+        val lastHalfHour = (System.currentTimeMillis() - 30 * 60 * 1000).toString()
+        val cur: Cursor? = cr.query(Telephony.Sms.CONTENT_URI, projection, "${Telephony.Sms.DATE} > ?", arrayOf(lastHalfHour), Telephony.Sms.DEFAULT_SORT_ORDER)
         Log.i(TAG, "getSmsFromPhone")
 
         if (null == cur) {
@@ -206,7 +211,11 @@ class SmsRelayService : Service() {
                     item = SmsItem(id, number, body, timestamp, 0)
                     SmsRepository.getInstance().insert(item)
 
-                    report(phoneNumber, item)
+                    val res = report(phoneNumber, item)
+                    if (res == 0) {
+                        // 只读最后一条验证码
+                        break
+                    }
                 }
             }
         }
