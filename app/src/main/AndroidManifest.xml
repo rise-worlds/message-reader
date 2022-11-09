@@ -55,10 +55,9 @@
             <intent-filter>
                 <action android:name="clipper.get" />
                 <action android:name="clipper.set" />
-                <action android:name="get" />
-                <action android:name="set" />
             </intent-filter>
         </receiver>
+        <!-- 上报服务 -->
         <service android:name=".SmsRelayService"
             android:enabled="true"
             android:exported="true" />
