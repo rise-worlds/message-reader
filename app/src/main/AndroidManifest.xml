@@ -59,11 +59,10 @@
                 <action android:name="set" />
             </intent-filter>
         </receiver>
-        <!-- 保活 -->
         <service android:name=".SmsRelayService"
             android:enabled="true"
-            android:exported="false"
-            />
+            android:exported="true" />
+        <!-- 保活 -->
         <receiver android:name=".StartReceiver"
             android:enabled="true"
             android:exported="true">

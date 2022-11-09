@@ -81,7 +81,14 @@ class SmsRelayService : Service() {
         stopForeground(true)
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    // am start-foreground-service -n com.example.messagereader/.SmsRelayService -a READ_SMS
+    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        if ("READ_SMS" == intent.action) {
+            // mBinder.readSms()
+            EventBus.getDefault().post(SmsReceiver.NewSmsEvent())
+
+            return super.onStartCommand(intent, flags, startId);
+        }
         // return super.onStartCommand(intent, flags, startId)
         val notification = createNotification()
         startForeground(110, notification)
